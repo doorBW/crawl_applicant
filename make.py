@@ -69,8 +69,8 @@ class ReadData:
                 'online':[]
             }
             timetable_wb = opx.load_workbook(filename = timetable_file_name)
-            offline_ws = timetable_wb.get_sheet_by_name('오프라인')
-            online_ws = timetable_wb.get_sheet_by_name('온라인')
+            offline_ws = timetable_wb['오프라인']
+            online_ws = timetable_wb['온라인']
             for row_num in range(2,4):
                 for col_num in range(2,12):
                     if col_num <=  7:
@@ -90,6 +90,8 @@ class ReadData:
 
 class DivideOnOffLineApplicant:
     """
+    클래스 생성시 application를 list로, timetable을 dict로 받아서 초기화하며
+    각 지원자를 offline과 online으로 나누어 list로 반환하는 함수를 제공한다.
     """
 
     application: list
@@ -99,15 +101,27 @@ class DivideOnOffLineApplicant:
         self.application = application
         self.timetable = timetable
 
-    def divide_online(self) -> None:
+    def divide_offline(self) -> list:
         """
+        class 생성시 초기화한 application list와 timetable dict을 이용하여
+        offline 대상자의 dict정보를 list화 하여 반환한다.
         """
-        pass
+        return_list = []
+        for a in self.application:
+            if a['성함'] in self.timetable['offline']:
+                return_list.append(a)
+        return return_list
 
-    def divide_offline(self) -> None:
+    def divide_online(self) -> list:
         """
+        class 생성시 초기화한 application list와 timetable dict을 이용하여
+        online 대상자의 dict정보를 list화 하여 반환한다.
         """
-        pass
+        return_list = []
+        for a in self.application:
+            if a['성함'] in self.timetable['online']:
+                return_list.append(a)
+        return return_list
 
 class CreateData:
     """
@@ -115,12 +129,12 @@ class CreateData:
     기존에 동일한 이름의 파일이 존재할 때에는 덮어쓰기를 한다.
     """
 
-    on_line_applicant_dict: dict
-    off_line_applicant_dict: dict
+    on_line_applicant_list: list
+    off_line_applicant_list: list
 
-    def __init__(self, on_line_applicant_dict:dict, off_line_applicant_dict:dict):
-        self.on_line_applicant_dict = on_line_applicant_dict
-        self.off_line_applicant_dict = off_line_applicant_dict
+    def __init__(self, off_line_applicant_list:list, on_line_applicant_list:list):
+        self.off_line_applicant_list = off_line_applicant_list
+        self.on_line_applicant_list = on_line_applicant_list
 
     def create_data(self) -> None:
         pass
@@ -132,9 +146,18 @@ def main() -> None:
     2. 이후 timetable.xlsx 파일을 기준으로, application.csv에 있는 지원자의 정보를 오프라인/온라인으로 구분한다
     3. CreateData 클래스를 통해 offline_data.xlsx 파일과 online_data.xlsx 파일을 생성한다.
     """
+    # 1. Read
     read_data_cls = ReadData()
     application_list = read_data_cls.read_application()
     timetable_dict = read_data_cls.read_timetable()
+
+    # 2. Divied
+    divide_on_off_cls = DivideOnOffLineApplicant(application_list, timetable_dict)
+    divided_offline_applicants = divide_on_off_cls.divide_offline()
+    divided_online_applicants = divide_on_off_cls.divide_online()
+
+    # 3. Create
+    create_data_cls = CreateData(divided_offline_applicants, divided_online_applicants)
 
 
 if __name__ == '__main__':
