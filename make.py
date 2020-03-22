@@ -136,8 +136,35 @@ class CreateData:
         self.off_line_applicant_list = off_line_applicant_list
         self.on_line_applicant_list = on_line_applicant_list
 
-    def create_data(self) -> None:
-        pass
+    def create_data(self) -> bool:
+        """
+        클래스 생성시 초기화한 on_line_applicant_list와 off_line_applicant_list를 통해 각각 online_data.xlsx파일, offline_data.xlsx파일로 생성한다.
+        """
+        try:
+            # offline
+            offline_filename = './data/offline_data.xlsx'
+            offline_wb = opx.Workbook()
+            offline_ws = offline_wb.active
+            offline_ws.append(['타임스탬프', '전화 번호', '성함', '재학중인 학교', '학과 (ex. ~학과 )', '지원 동기 (500자 내외)', '자신이 만들고 싶은 서비스에 대해 간략하게 알려주세요 (500자 내외)', '멋쟁이 사자처럼 활동을 하면서 얻고 싶은 것 (300자 내외)', '자신이 다뤄본 컴퓨터 언어', '저희와 함께 하시겠습니까?', 'pk'])
+            for applicant in self.off_line_applicant_list:
+                offline_ws.append(list(applicant.values()))
+            offline_wb.save(filename=offline_filename)
+
+            # online
+            online_filename = './data/online_data.xlsx'
+            online_wb = opx.Workbook()
+            online_ws = online_wb.active
+            online_ws.append(['타임스탬프', '전화 번호', '성함', '재학중인 학교', '학과 (ex. ~학과 )', '지원 동기 (500자 내외)', '자신이 만들고 싶은 서비스에 대해 간략하게 알려주세요 (500자 내외)', '멋쟁이 사자처럼 활동을 하면서 얻고 싶은 것 (300자 내외)', '자신이 다뤄본 컴퓨터 언어', '저희와 함께 하시겠습니까?', 'pk'])
+            for applicant in self.on_line_applicant_list:
+                online_ws.append(list(applicant.values()))
+            online_wb.save(filename=online_filename)
+
+            return True
+        except:
+            return False
+        
+        
+
 
 def main() -> None:
     """
@@ -158,7 +185,11 @@ def main() -> None:
 
     # 3. Create
     create_data_cls = CreateData(divided_offline_applicants, divided_online_applicants)
-
+    create_result = create_data_cls.create_data()
+    if create_result:
+        print("data 폴더에 정상적으로 파일을 생성하였습니다.")
+    else:
+        print("파일 생성에 실패하였습니다.")
 
 if __name__ == '__main__':
     main()
