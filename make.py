@@ -1,28 +1,68 @@
+import csv, sys
+import openpyxl as opx
+
 class ReadData:
     """
-    data 폴더 내부의 application.csv 파일과, timetable.xlsx 파일을 읽고 dict형태로 반환하는 함수를 제공한다.
+    data 폴더 내부의 application.csv 파일과, timetable.xlsx 파일을 읽고 각각 list, dict형태로 반환하는 함수를 제공한다.
     """
     def __init__(self):
         pass
 
-    def read_application(self) -> dict:
+    def read_application(self) -> list:
         """
+        data 폴더의 application.csv파일에 대해 각 지원자의 입력 정보를 dict로 읽고 모든 지원자의 정보를 가지는 list를 반환한다.
+        이때, 지원자의 이름과 전화번호 끝 네자리를 결합한 pk key값을 추가한다.
+        
+        * error case
+        FileNotFoundError -> 관련 텍스트 출력 후 프로그램 종료
+
+        * return example
+        [
+            {
+                '타임스탬프': '2020/03/20 11:58:49 오후 GMT+9',
+                '전화 번호': '01012345678',
+                '성함': '홍길동',
+                '재학중인 학교': '서울과학기술대학교',
+                '학과 (ex. ~학과 )': '컴퓨터공학과',
+                '지원 동기 (500자 내외)': '...',
+                '자신이 만들고 싶은 서비스에 대해 간략하게 알려주세요 (500자 내외)': '...',
+                '멋쟁이 사자처럼 활동을 하면서 얻고 싶은 것 (300자 내외)': '...',
+                '자신이 다뤄본 컴퓨터 언어': 'C, C++',
+                '저희와 함께 하시겠습니까?': '예',
+                'pk': '홍길동5678'
+            },{
+                ...
+            }, ...
+        ]
         """
-        pass
+        try:
+            application_file_name = './data/application.csv'
+            application_list = []
+            with open(application_file_name, newline='') as application_file:
+                application_dict_reader = csv.DictReader(application_file)
+                for row in application_dict_reader:
+                    row['pk'] = row['성함']+row['전화 번호'][-4:]
+                    application_list.append(row)
+            return application_list
+        except FileNotFoundError:
+            print("[ERROR] application.csv 파일이 존재하지 않습니다.")
+            sys.exit()
+            
 
     def read_timetable(self) -> dict:
         """
         """
+
         pass
 
 class DivideOnOffLineApplicant:
     """
     """
 
-    application: dict
+    application: list
     timetable: dict
 
-    def __init__(self, application:dict, timetable:dict):
+    def __init__(self, application:list, timetable:dict):
         self.application = application
         self.timetable = timetable
 
@@ -55,11 +95,14 @@ class CreateData:
 def main() -> None:
     """
     main 함수.
-    1. ReadData 클래스를 통해 application.csv 파일과 timetable.xlsx 파일을 읽어서 dict 형태로 가져온다.
+    1. ReadData 클래스를 통해 application.csv 파일과 timetable.xlsx 파일을 읽어서 각각 list, dict 형태로 가져온다.
     2. 이후 timetable.xlsx 파일을 기준으로, application.csv에 있는 지원자의 정보를 오프라인/온라인으로 구분한다
     3. CreateData 클래스를 통해 offline_data.xlsx 파일과 online_data.xlsx 파일을 생성한다.
     """
+    read_data_cls = ReadData()
+    application_list = read_data_cls.read_application()
+    timetable = read_data_cls.read_timetable()
 
 
 if __name__ == '__main__':
-    pass
+    main()
