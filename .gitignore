@@ -1,0 +1,6 @@
+data/application.*
+data/timetable.*
+data/*.csv
+data/*.xlsx
+
+.vscode/
