@@ -48,10 +48,43 @@ class ReadData:
             print("[ERROR] application.csv 파일이 존재하지 않습니다.")
             sys.exit()
             
-
     def read_timetable(self) -> dict:
         """
+        data 폴더의 timetable.xlsx파일에 대해 오프라인/온라인 별로 읽어서 시간순서대로 지원자의 이름을 list로 가지는 dict를 반환한다.
+
+        * error case
+        FileNotFoundError -> 관련 텍스트 출력 후 프로그램 종료
+        KeyError -> 관련 텍스트 출력 후 프로그램 종료
+
+        * return example
+        {
+            'offline':['홍길동','김철수',...],
+            'online':[...]
+        }
         """
+        try:
+            timetable_file_name = './data/timetable.xlsx'
+            return_dict = {
+                'offline':[],
+                'online':[]
+            }
+            timetable_wb = opx.load_workbook(filename = timetable_file_name)
+            offline_ws = timetable_wb.get_sheet_by_name('오프라인')
+            online_ws = timetable_wb.get_sheet_by_name('온라인')
+            for row_num in range(2,4):
+                for col_num in range(2,12):
+                    if col_num <=  7:
+                        applicant_list = (online_ws.cell(row=row_num, column=col_num).value).split('\n')
+                        return_dict['online'] += filter(lambda x: x!='', applicant_list)
+                    applicant_list = (offline_ws.cell(row=row_num, column=col_num).value).split('\n')
+                    return_dict['offline'] += filter(lambda x: x!='', applicant_list)
+            return return_dict
+        except FileNotFoundError:
+            print("[ERROR] timetable.xlsx 파일이 존재하지 않습니다.")
+            sys.exit()
+        except KeyError:
+            print("[ERROR] sheet 이름이 '오프라인' 또는 '온라인' 으로 되어있는지 확인해주세요.")
+            sys.exit()
 
         pass
 
@@ -101,7 +134,7 @@ def main() -> None:
     """
     read_data_cls = ReadData()
     application_list = read_data_cls.read_application()
-    timetable = read_data_cls.read_timetable()
+    timetable_dict = read_data_cls.read_timetable()
 
 
 if __name__ == '__main__':
